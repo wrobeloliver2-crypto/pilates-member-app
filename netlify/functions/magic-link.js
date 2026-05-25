@@ -1,9 +1,9 @@
 // netlify/functions/magic-link.js
-// Sends a magic login link via email
+// Sends a magic login link via Microsoft 365 Graph API
 
 const { GoogleAuth } = require('google-auth-library');
 const { google } = require('googleapis');
-const nodemailer = require('nodemailer');
+const { sendMail } = require('./send-mail');
 const crypto = require('crypto');
 
 const SHEET_ID = process.env.GOOGLE_SHEET_ID;
@@ -27,11 +27,11 @@ exports.handler = async (event) => {
     const row = rows.find(r => r[1] === email);
     if (!row) return respond(404, { ok: false, error: 'E-Mail nicht gefunden. Bitte zuerst registrieren.' });
 
-    // Generate token
+    // Generate token (15 min validity)
     const token = crypto.randomBytes(32).toString('hex');
-    const expires = Date.now() + 15 * 60 * 1000; // 15 min
+    const expires = Date.now() + 15 * 60 * 1000;
 
-    // Save token in sheet (Tokens tab)
+    // Save token in Tokens tab
     await sheets.spreadsheets.values.append({
       spreadsheetId: SHEET_ID,
       range: 'Tokens!A:C',
@@ -39,40 +39,38 @@ exports.handler = async (event) => {
       requestBody: { values: [[token, email, expires.toString()]] },
     });
 
-    // Send email
-    const transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST,
-      port: 587,
-      auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
-    });
-
+    // Send magic link via Graph API
     const loginUrl = `${APP_URL}/?token=${token}`;
-    await transporter.sendMail({
-      from: `Pilates Company <${process.env.SMTP_USER}>`,
+    await sendMail({
       to: email,
-      subject: 'Dein Login-Link für die Pilates Company App',
+      subject: 'Dein Login-Link – Pilates Company App',
       html: `
         <div style="font-family: Georgia, serif; max-width: 500px; margin: 0 auto; padding: 40px 20px; color: #2a2520;">
-          <h1 style="font-size: 24px; color: #d9a49a; margin-bottom: 8px;">Pilates Company</h1>
-          <h2 style="font-size: 18px; margin-bottom: 24px;">Dein Login-Link</h2>
-          <p style="font-size: 15px; line-height: 1.6; margin-bottom: 32px;">
-            Hallo ${row[0]},<br><br>
-            hier ist dein persönlicher Login-Link. Er ist <strong>15 Minuten gültig</strong>.
+          <h1 style="font-size: 22px; color: #d9a49a; margin-bottom: 4px;">Pilates Company</h1>
+          <p style="font-size: 12px; color: #aaa; margin-bottom: 32px;">Lübeck · Mitglieder App</p>
+          <h2 style="font-size: 18px; margin-bottom: 16px;">Hallo ${row[0]},</h2>
+          <p style="font-size: 15px; line-height: 1.7; margin-bottom: 32px;">
+            hier ist dein persönlicher Login-Link.<br>
+            Er ist <strong>15 Minuten gültig</strong> – einfach draufklicken.
           </p>
           <a href="${loginUrl}" style="
             display: inline-block;
             background: #d9a49a;
             color: white;
-            padding: 16px 32px;
+            padding: 16px 36px;
             border-radius: 50px;
             text-decoration: none;
             font-size: 16px;
             font-family: sans-serif;
             font-weight: 500;
+            letter-spacing: 0.02em;
           ">Jetzt einloggen →</a>
-          <p style="font-size: 12px; color: #aaa; margin-top: 32px;">
-            Falls du diesen Link nicht angefordert hast, kannst du diese E-Mail ignorieren.
+          <p style="font-size: 12px; color: #bbb; margin-top: 40px; line-height: 1.6;">
+            Falls du diesen Link nicht angefordert hast, kannst du diese E-Mail einfach ignorieren.<br>
+            Dein Konto bleibt sicher.
           </p>
+          <hr style="border: none; border-top: 1px solid #eee; margin: 32px 0;">
+          <p style="font-size: 11px; color: #ccc;">Pilates Company Lübeck · pilatescompany.de</p>
         </div>
       `,
     });
