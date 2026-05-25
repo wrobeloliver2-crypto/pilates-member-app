@@ -1,0 +1,1532 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Pilates Company">
+  <meta name="theme-color" content="#d9a49a">
+  <title>Pilates Company Lübeck</title>
+  <link rel="manifest" href="/manifest.json">
+  <link rel="apple-touch-icon" href="/icon-192.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --rose: #d9a49a;
+      --rose-dark: #c48d83;
+      --rose-light: #f0d5d1;
+      --rose-pale: #faf3f2;
+      --charcoal: #2a2520;
+      --charcoal-mid: #4a4540;
+      --cream: #faf7f3;
+      --cream-dark: #f0ebe3;
+      --white: #ffffff;
+      --success: #55725e;
+      --shadow: 0 4px 24px rgba(42,37,32,0.10);
+      --shadow-lg: 0 8px 40px rgba(42,37,32,0.15);
+      --radius: 20px;
+      --radius-sm: 12px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--cream);
+      color: var(--charcoal);
+      min-height: 100vh;
+      min-height: -webkit-fill-available;
+      overflow-x: hidden;
+    }
+
+    /* ── APP SHELL ── */
+    #app {
+      max-width: 430px;
+      margin: 0 auto;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    /* ── SCREENS ── */
+    .screen {
+      display: none;
+      flex: 1;
+      flex-direction: column;
+      min-height: 100vh;
+      animation: fadeIn 0.3s ease;
+    }
+    .screen.active { display: flex; }
+
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* ── BOTTOM NAV ── */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 430px;
+      background: var(--white);
+      border-top: 1px solid var(--cream-dark);
+      display: none;
+      justify-content: space-around;
+      align-items: center;
+      padding: 10px 0 max(10px, env(safe-area-inset-bottom));
+      z-index: 100;
+      box-shadow: 0 -4px 20px rgba(42,37,32,0.06);
+    }
+    .bottom-nav.visible { display: flex; }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+      padding: 4px 16px;
+      border-radius: 12px;
+      transition: all 0.2s;
+      color: #aaa;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+    }
+    .nav-item svg { width: 22px; height: 22px; transition: all 0.2s; }
+    .nav-item.active { color: var(--rose-dark); }
+    .nav-item.active svg { stroke: var(--rose-dark); transform: scale(1.1); }
+
+    /* ── HEADER ── */
+    .app-header {
+      background: var(--white);
+      padding: 56px 24px 20px;
+      border-bottom: 1px solid var(--cream-dark);
+    }
+    .app-header h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 22px;
+      color: var(--charcoal);
+    }
+    .app-header p { font-size: 13px; color: var(--charcoal-mid); margin-top: 2px; }
+
+    /* ── BUTTONS ── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 16px 28px;
+      border-radius: 50px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      font-weight: 500;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+      letter-spacing: 0.01em;
+      width: 100%;
+    }
+    .btn-primary { background: var(--rose); color: var(--white); }
+    .btn-primary:hover { background: var(--rose-dark); transform: translateY(-1px); box-shadow: var(--shadow); }
+    .btn-primary:active { transform: translateY(0); }
+    .btn-secondary { background: var(--cream-dark); color: var(--charcoal); }
+    .btn-outline { background: transparent; color: var(--rose-dark); border: 1.5px solid var(--rose); }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    /* ── CARDS ── */
+    .card {
+      background: var(--white);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow);
+    }
+
+    /* ── INPUTS ── */
+    .input-group { display: flex; flex-direction: column; gap: 8px; }
+    .input-group label { font-size: 13px; font-weight: 500; color: var(--charcoal-mid); letter-spacing: 0.04em; text-transform: uppercase; }
+    .input-group input {
+      padding: 14px 18px;
+      border: 1.5px solid var(--cream-dark);
+      border-radius: var(--radius-sm);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 16px;
+      color: var(--charcoal);
+      background: var(--cream);
+      transition: border-color 0.2s;
+      outline: none;
+      -webkit-appearance: none;
+    }
+    .input-group input:focus { border-color: var(--rose); background: var(--white); }
+
+    /* ════════════════════════════════════════
+       SCREEN: LOGIN
+    ════════════════════════════════════════ */
+    #screen-login {
+      background: var(--cream);
+      justify-content: center;
+      padding: 40px 28px;
+      padding-bottom: max(40px, env(safe-area-inset-bottom));
+    }
+
+    .login-logo {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+    .login-logo .logo-mark {
+      width: 72px;
+      height: 72px;
+      background: var(--rose);
+      border-radius: 22px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+      box-shadow: 0 8px 32px rgba(217,164,154,0.4);
+    }
+    .login-logo .logo-mark svg { width: 40px; height: 40px; }
+    .login-logo h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 28px;
+      color: var(--charcoal);
+      line-height: 1.2;
+    }
+    .login-logo p { font-size: 14px; color: var(--charcoal-mid); margin-top: 6px; }
+
+    .login-card {
+      background: var(--white);
+      border-radius: var(--radius);
+      padding: 32px 24px;
+      box-shadow: var(--shadow-lg);
+    }
+    .login-card h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 20px;
+      margin-bottom: 6px;
+    }
+    .login-card .subtitle { font-size: 14px; color: var(--charcoal-mid); margin-bottom: 28px; line-height: 1.5; }
+
+    .login-form { display: flex; flex-direction: column; gap: 20px; }
+
+    .login-toggle {
+      display: flex;
+      background: var(--cream);
+      border-radius: 12px;
+      padding: 4px;
+      margin-bottom: 8px;
+    }
+    .toggle-btn {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      background: transparent;
+      border-radius: 10px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      color: var(--charcoal-mid);
+    }
+    .toggle-btn.active { background: var(--white); color: var(--charcoal); box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+
+    .magic-link-sent {
+      display: none;
+      text-align: center;
+      padding: 20px 0;
+    }
+    .magic-link-sent .icon { font-size: 48px; margin-bottom: 16px; }
+    .magic-link-sent h3 { font-family: 'Playfair Display', serif; font-size: 20px; margin-bottom: 8px; }
+    .magic-link-sent p { font-size: 14px; color: var(--charcoal-mid); line-height: 1.6; }
+
+    /* ════════════════════════════════════════
+       SCREEN: HOME
+    ════════════════════════════════════════ */
+    #screen-home {
+      padding-bottom: 90px;
+    }
+
+    .home-header {
+      background: var(--charcoal);
+      padding: 56px 24px 32px;
+      position: relative;
+      overflow: hidden;
+    }
+    .home-header::before {
+      content: '';
+      position: absolute;
+      top: -40px; right: -40px;
+      width: 200px; height: 200px;
+      background: var(--rose);
+      border-radius: 50%;
+      opacity: 0.15;
+    }
+    .home-header::after {
+      content: '';
+      position: absolute;
+      bottom: -60px; left: -20px;
+      width: 150px; height: 150px;
+      background: var(--rose-light);
+      border-radius: 50%;
+      opacity: 0.1;
+    }
+    .home-header .greeting {
+      font-size: 13px;
+      color: rgba(255,255,255,0.6);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .home-header h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 28px;
+      color: var(--white);
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Streak Widget */
+    .streak-widget {
+      margin: 16px;
+      background: var(--white);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .streak-flame {
+      width: 56px;
+      height: 56px;
+      background: linear-gradient(135deg, #ff9a56, #ff5e3a);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      flex-shrink: 0;
+      box-shadow: 0 4px 16px rgba(255,94,58,0.3);
+    }
+    .streak-info { flex: 1; }
+    .streak-number {
+      font-family: 'Playfair Display', serif;
+      font-size: 32px;
+      color: var(--charcoal);
+      line-height: 1;
+    }
+    .streak-number span { font-size: 14px; font-family: 'DM Sans', sans-serif; color: var(--charcoal-mid); }
+    .streak-label { font-size: 13px; color: var(--charcoal-mid); margin-top: 4px; }
+    .streak-weeks {
+      display: flex;
+      gap: 6px;
+      margin-top: 10px;
+    }
+    .streak-dot {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background: var(--cream-dark);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--charcoal-mid);
+    }
+    .streak-dot.done { background: var(--rose); color: var(--white); }
+    .streak-dot.current { background: var(--charcoal); color: var(--white); }
+
+    /* Quick Check-in Button */
+    .checkin-cta {
+      margin: 0 16px 16px;
+    }
+    .checkin-cta .btn-primary {
+      background: var(--rose);
+      font-size: 16px;
+      padding: 18px;
+      border-radius: var(--radius);
+      box-shadow: 0 6px 24px rgba(217,164,154,0.4);
+    }
+
+    /* Milestone Progress */
+    .milestone-card {
+      margin: 0 16px 16px;
+    }
+    .milestone-card .card-title {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--charcoal-mid);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+    .milestone-progress {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+    .milestone-icon { font-size: 28px; }
+    .progress-info { flex: 1; }
+    .progress-bar-wrap {
+      height: 8px;
+      background: var(--cream-dark);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 6px;
+    }
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--rose-light), var(--rose));
+      border-radius: 4px;
+      transition: width 0.6s ease;
+    }
+    .progress-text { font-size: 12px; color: var(--charcoal-mid); margin-top: 4px; }
+    .progress-label { font-size: 14px; font-weight: 500; color: var(--charcoal); }
+
+    /* Stats Row */
+    .stats-row {
+      margin: 0 16px 16px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .stat-card {
+      background: var(--white);
+      border-radius: var(--radius-sm);
+      padding: 16px;
+      box-shadow: var(--shadow);
+    }
+    .stat-value {
+      font-family: 'Playfair Display', serif;
+      font-size: 28px;
+      color: var(--charcoal);
+    }
+    .stat-label { font-size: 12px; color: var(--charcoal-mid); margin-top: 2px; }
+
+    /* News Preview */
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 0 16px 12px;
+    }
+    .section-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 18px;
+      color: var(--charcoal);
+    }
+    .section-link { font-size: 13px; color: var(--rose-dark); cursor: pointer; }
+
+    .news-preview {
+      margin: 0 16px 16px;
+      background: var(--white);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+    .news-item-preview {
+      padding: 16px;
+      border-bottom: 1px solid var(--cream-dark);
+      cursor: pointer;
+    }
+    .news-item-preview:last-child { border-bottom: none; }
+    .news-badge {
+      display: inline-block;
+      background: var(--rose-pale);
+      color: var(--rose-dark);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: 6px;
+      margin-bottom: 6px;
+    }
+    .news-badge.urgent { background: #fff0ee; color: #c0392b; }
+    .news-item-preview h4 { font-size: 14px; font-weight: 500; color: var(--charcoal); }
+    .news-item-preview p { font-size: 13px; color: var(--charcoal-mid); margin-top: 2px; line-height: 1.4; }
+
+    /* ════════════════════════════════════════
+       SCREEN: CHECK-IN
+    ════════════════════════════════════════ */
+    #screen-checkin {
+      padding-bottom: 90px;
+    }
+
+    .checkin-header {
+      background: var(--charcoal);
+      padding: 56px 24px 28px;
+      text-align: center;
+    }
+    .checkin-header h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 24px;
+      color: var(--white);
+      margin-bottom: 6px;
+    }
+    .checkin-header p { font-size: 14px; color: rgba(255,255,255,0.6); }
+
+    .qr-scanner-area {
+      margin: 24px 16px 0;
+    }
+    .qr-box {
+      background: var(--white);
+      border-radius: var(--radius);
+      padding: 32px 24px;
+      text-align: center;
+      box-shadow: var(--shadow);
+    }
+    .qr-icon {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 20px;
+      background: var(--rose-pale);
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .qr-icon svg { width: 44px; height: 44px; }
+    .qr-box h3 { font-family: 'Playfair Display', serif; font-size: 20px; margin-bottom: 8px; }
+    .qr-box p { font-size: 14px; color: var(--charcoal-mid); line-height: 1.6; margin-bottom: 24px; }
+
+    /* Room selector */
+    .room-selector {
+      margin: 20px 16px 0;
+    }
+    .room-selector h3 {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--charcoal-mid);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    .room-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+    }
+    .room-btn {
+      background: var(--white);
+      border: 2px solid var(--cream-dark);
+      border-radius: var(--radius-sm);
+      padding: 16px 8px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .room-btn:hover { border-color: var(--rose); }
+    .room-btn.selected { border-color: var(--rose); background: var(--rose-pale); }
+    .room-btn .room-name { font-size: 13px; font-weight: 600; color: var(--charcoal); display: block; }
+    .room-btn .room-course { font-size: 11px; color: var(--charcoal-mid); margin-top: 3px; display: block; }
+
+    /* Check-in success */
+    .checkin-success {
+      display: none;
+      margin: 24px 16px 0;
+      background: var(--white);
+      border-radius: var(--radius);
+      padding: 32px 24px;
+      text-align: center;
+      box-shadow: var(--shadow);
+    }
+    .checkin-success .success-icon {
+      width: 72px;
+      height: 72px;
+      background: linear-gradient(135deg, #6db88a, var(--success));
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+      box-shadow: 0 8px 24px rgba(85,114,94,0.3);
+      animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    @keyframes popIn { from { transform: scale(0); } to { transform: scale(1); } }
+    .checkin-success .success-icon svg { width: 36px; height: 36px; }
+    .checkin-success h3 { font-family: 'Playfair Display', serif; font-size: 22px; margin-bottom: 8px; }
+    .checkin-success p { font-size: 14px; color: var(--charcoal-mid); line-height: 1.6; }
+    .checkin-success .course-name {
+      background: var(--rose-pale);
+      border-radius: 12px;
+      padding: 12px 20px;
+      margin: 16px 0;
+      font-weight: 500;
+      color: var(--rose-dark);
+    }
+    .checkin-success .streak-bump {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 12px;
+      font-size: 13px;
+      color: var(--charcoal-mid);
+    }
+
+    /* ════════════════════════════════════════
+       SCREEN: NEWS
+    ════════════════════════════════════════ */
+    #screen-news { padding-bottom: 90px; }
+
+    .news-list { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+
+    .news-card {
+      background: var(--white);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .news-card:active { transform: scale(0.98); }
+    .news-card-body { padding: 18px; }
+    .news-card-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    .news-card h3 { font-family: 'Playfair Display', serif; font-size: 17px; margin-bottom: 6px; }
+    .news-card p { font-size: 14px; color: var(--charcoal-mid); line-height: 1.6; }
+    .news-date { font-size: 11px; color: var(--charcoal-mid); }
+
+    /* Push permission banner */
+    .push-banner {
+      margin: 16px 16px 0;
+      background: linear-gradient(135deg, var(--charcoal), var(--charcoal-mid));
+      border-radius: var(--radius);
+      padding: 18px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      cursor: pointer;
+    }
+    .push-banner-icon { font-size: 28px; flex-shrink: 0; }
+    .push-banner-text { flex: 1; }
+    .push-banner-text h4 { font-size: 14px; font-weight: 500; color: var(--white); margin-bottom: 2px; }
+    .push-banner-text p { font-size: 12px; color: rgba(255,255,255,0.6); line-height: 1.4; }
+    .push-banner-arrow { color: var(--rose-light); font-size: 18px; }
+
+    /* ════════════════════════════════════════
+       SCREEN: STUNDENPLAN
+    ════════════════════════════════════════ */
+    #screen-schedule { padding-bottom: 90px; }
+
+    .schedule-widget-wrap {
+      padding: 16px;
+    }
+
+    /* ════════════════════════════════════════
+       SCREEN: PROFIL
+    ════════════════════════════════════════ */
+    #screen-profile { padding-bottom: 90px; }
+
+    .profile-header {
+      background: var(--charcoal);
+      padding: 56px 24px 32px;
+      text-align: center;
+    }
+    .avatar {
+      width: 72px;
+      height: 72px;
+      background: var(--rose);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 12px;
+      font-family: 'Playfair Display', serif;
+      font-size: 28px;
+      color: var(--white);
+    }
+    .profile-header h2 { font-family: 'Playfair Display', serif; font-size: 22px; color: var(--white); }
+    .profile-header p { font-size: 13px; color: rgba(255,255,255,0.6); margin-top: 4px; }
+
+    .profile-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      background: rgba(255,255,255,0.05);
+      border-top: 1px solid rgba(255,255,255,0.1);
+      margin-top: 24px;
+    }
+    .profile-stat {
+      padding: 16px 8px;
+      text-align: center;
+      border-right: 1px solid rgba(255,255,255,0.1);
+    }
+    .profile-stat:last-child { border-right: none; }
+    .profile-stat .val { font-family: 'Playfair Display', serif; font-size: 24px; color: var(--white); }
+    .profile-stat .lbl { font-size: 11px; color: rgba(255,255,255,0.5); margin-top: 2px; }
+
+    .profile-section { padding: 20px 16px 0; }
+    .profile-section-title {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--charcoal-mid);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    .milestone-list { display: flex; flex-direction: column; gap: 10px; }
+    .milestone-item {
+      background: var(--white);
+      border-radius: var(--radius-sm);
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      box-shadow: var(--shadow);
+    }
+    .milestone-item .m-icon { font-size: 24px; flex-shrink: 0; }
+    .milestone-item .m-info { flex: 1; }
+    .milestone-item .m-title { font-size: 14px; font-weight: 500; color: var(--charcoal); }
+    .milestone-item .m-sub { font-size: 12px; color: var(--charcoal-mid); margin-top: 2px; }
+    .milestone-item .m-status {
+      font-size: 11px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-weight: 500;
+    }
+    .m-status.done { background: #e8f5ec; color: var(--success); }
+    .m-status.pending { background: var(--cream-dark); color: var(--charcoal-mid); }
+
+    .checkin-history { display: flex; flex-direction: column; gap: 8px; }
+    .history-item {
+      background: var(--white);
+      border-radius: var(--radius-sm);
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 2px 8px rgba(42,37,32,0.06);
+    }
+    .history-dot {
+      width: 10px; height: 10px;
+      background: var(--rose);
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .history-item .h-course { font-size: 14px; font-weight: 500; color: var(--charcoal); }
+    .history-item .h-date { font-size: 12px; color: var(--charcoal-mid); margin-top: 1px; }
+    .history-item .h-room { margin-left: auto; font-size: 11px; color: var(--charcoal-mid); background: var(--cream-dark); padding: 3px 8px; border-radius: 6px; }
+
+    .logout-wrap { padding: 20px 16px; }
+
+    /* ── TOAST ── */
+    .toast {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-80px);
+      background: var(--charcoal);
+      color: var(--white);
+      padding: 12px 20px;
+      border-radius: 50px;
+      font-size: 14px;
+      z-index: 999;
+      transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      white-space: nowrap;
+      max-width: 90vw;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+
+    /* ── LOADING ── */
+    .loading-overlay {
+      position: fixed; inset: 0;
+      background: var(--cream);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      transition: opacity 0.4s;
+    }
+    .loading-overlay.hidden { opacity: 0; pointer-events: none; }
+    .loading-logo { font-family: 'Playfair Display', serif; font-size: 24px; color: var(--charcoal); margin-top: 16px; }
+    .spinner {
+      width: 36px; height: 36px;
+      border: 3px solid var(--rose-light);
+      border-top-color: var(--rose);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Eversports widget override */
+    .schedule-widget-wrap iframe,
+    .schedule-widget-wrap > div {
+      border-radius: var(--radius) !important;
+      overflow: hidden !important;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Loading -->
+<div class="loading-overlay" id="loading">
+  <div class="spinner"></div>
+  <div class="loading-logo">Pilates Company</div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<div id="app">
+
+  <!-- ════════ SCREEN: LOGIN ════════ -->
+  <div class="screen" id="screen-login">
+    <div class="login-logo">
+      <div class="logo-mark">
+        <svg viewBox="0 0 40 40" fill="none" stroke="white" stroke-width="1.5">
+          <circle cx="20" cy="20" r="12"/>
+          <path d="M20 8 C26 14 26 26 20 32 C14 26 14 14 20 8Z" fill="rgba(255,255,255,0.3)" stroke="white"/>
+          <path d="M8 20 C14 14 26 14 32 20 C26 26 14 26 8 20Z" fill="rgba(255,255,255,0.3)" stroke="white"/>
+        </svg>
+      </div>
+      <h1>Pilates Company</h1>
+      <p>Lübeck · Mitglieder App</p>
+    </div>
+
+    <div class="login-card">
+      <div class="login-toggle">
+        <button class="toggle-btn active" id="toggle-login" onclick="setMode('login')">Einloggen</button>
+        <button class="toggle-btn" id="toggle-register" onclick="setMode('register')">Registrieren</button>
+      </div>
+
+      <!-- Login Form -->
+      <div id="form-login">
+        <p class="subtitle">Gib deine E-Mail ein – wir schicken dir einen Login-Link.</p>
+        <div class="login-form">
+          <div class="input-group">
+            <label>E-Mail</label>
+            <input type="email" id="login-email" placeholder="deine@email.de" autocomplete="email">
+          </div>
+          <button class="btn btn-primary" onclick="sendMagicLink()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,12 2,6"/></svg>
+            Magic Link senden
+          </button>
+        </div>
+      </div>
+
+      <!-- Register Form -->
+      <div id="form-register" style="display:none">
+        <p class="subtitle">Erstelle dein Mitglieder-Konto und sammle ab sofort Punkte für jeden Kursbesuch.</p>
+        <div class="login-form">
+          <div class="input-group">
+            <label>Vorname & Nachname</label>
+            <input type="text" id="reg-name" placeholder="Max Mustermann" autocomplete="name">
+          </div>
+          <div class="input-group">
+            <label>E-Mail</label>
+            <input type="email" id="reg-email" placeholder="deine@email.de" autocomplete="email">
+          </div>
+          <button class="btn btn-primary" onclick="register()">
+            Konto erstellen & einloggen
+          </button>
+        </div>
+      </div>
+
+      <!-- Magic Link Sent -->
+      <div class="magic-link-sent" id="magic-sent">
+        <div class="icon">📬</div>
+        <h3>Check deine Mails!</h3>
+        <p>Wir haben dir einen Login-Link geschickt. Einfach draufklicken – fertig.</p>
+        <br>
+        <button class="btn btn-secondary" onclick="resetLogin()" style="margin-top:8px">Zurück</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════ SCREEN: HOME ════════ -->
+  <div class="screen" id="screen-home">
+    <div class="home-header">
+      <div class="greeting">Willkommen zurück</div>
+      <h2 id="home-name">Hanna</h2>
+    </div>
+
+    <!-- Streak -->
+    <div class="streak-widget">
+      <div class="streak-flame">🔥</div>
+      <div class="streak-info">
+        <div class="streak-number" id="streak-count">3 <span>Wochen</span></div>
+        <div class="streak-label">Aktuelle Serie</div>
+        <div class="streak-weeks" id="streak-dots"></div>
+      </div>
+    </div>
+
+    <!-- Check-in CTA -->
+    <div class="checkin-cta">
+      <button class="btn btn-primary" onclick="showScreen('checkin')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+        Jetzt einchecken
+      </button>
+    </div>
+
+    <!-- Milestone Progress -->
+    <div class="milestone-card">
+      <div class="card">
+        <div class="card-title">Nächster Meilenstein</div>
+        <div class="milestone-progress">
+          <div class="milestone-icon">🎁</div>
+          <div class="progress-info">
+            <div class="progress-label">Drop-in für einen Freund</div>
+            <div class="progress-bar-wrap">
+              <div class="progress-bar" id="milestone-bar" style="width: 65%"></div>
+            </div>
+            <div class="progress-text" id="milestone-text">13 von 20 Check-ins</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-value" id="stat-total">13</div>
+        <div class="stat-label">Kurse gesamt</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="stat-month">4</div>
+        <div class="stat-label">Diesen Monat</div>
+      </div>
+    </div>
+
+    <!-- News Preview -->
+    <div class="section-header">
+      <div class="section-title">Studio News</div>
+      <div class="section-link" onclick="showScreen('news')">Alle ansehen →</div>
+    </div>
+    <div class="news-preview" id="news-preview-list">
+      <div class="news-item-preview">
+        <div class="news-badge">Info</div>
+        <h4>Lade...</h4>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════ SCREEN: CHECK-IN ════════ -->
+  <div class="screen" id="screen-checkin">
+    <div class="checkin-header">
+      <h2>Check-in</h2>
+      <p>Wähle deinen aktuellen Raum</p>
+    </div>
+
+    <!-- Success State -->
+    <div class="checkin-success" id="checkin-success">
+      <div class="success-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <h3>Eingecheckt! 🎉</h3>
+      <div class="course-name" id="success-course">Reformer Pilates</div>
+      <p>Viel Spaß beim Kurs!</p>
+      <div class="streak-bump">
+        🔥 Deine Serie läuft – weiter so!
+      </div>
+      <br>
+      <button class="btn btn-secondary" onclick="resetCheckin()" style="margin-top:8px">Schließen</button>
+    </div>
+
+    <!-- Room Selector -->
+    <div class="room-selector" id="room-selector">
+      <h3>Raum auswählen</h3>
+      <div class="room-grid" id="room-grid"></div>
+      <br>
+      <div style="padding: 0 0 12px">
+        <button class="btn btn-primary" id="checkin-confirm-btn" onclick="confirmCheckin()" disabled>
+          Einchecken bestätigen
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════ SCREEN: NEWS ════════ -->
+  <div class="screen" id="screen-news">
+    <div class="app-header">
+      <h1>Studio News</h1>
+      <p>Aktuelles aus dem Studio</p>
+    </div>
+
+    <!-- Push Banner -->
+    <div class="push-banner" id="push-banner" onclick="requestPush()">
+      <div class="push-banner-icon">🔔</div>
+      <div class="push-banner-text">
+        <h4>Benachrichtigungen aktivieren</h4>
+        <p>Erfahre sofort von Kursausfällen & News</p>
+      </div>
+      <div class="push-banner-arrow">›</div>
+    </div>
+
+    <div class="news-list" id="news-list">
+      <div style="text-align:center; padding: 40px; color: var(--charcoal-mid);">Lädt...</div>
+    </div>
+  </div>
+
+  <!-- ════════ SCREEN: STUNDENPLAN ════════ -->
+  <div class="screen" id="screen-schedule">
+    <div class="app-header">
+      <h1>Stundenplan</h1>
+      <p>Alle Kurse auf einen Blick</p>
+    </div>
+    <div class="schedule-widget-wrap">
+      <div data-eversports-widget-id="ebffdccb-99f5-4c19-bab3-95ac6c787f06"></div>
+      <script type="module" src="https://widget-static.eversports.io/loader.js" async defer></script>
+    </div>
+  </div>
+
+  <!-- ════════ SCREEN: PROFIL ════════ -->
+  <div class="screen" id="screen-profile">
+    <div class="profile-header">
+      <div class="avatar" id="profile-avatar">H</div>
+      <h2 id="profile-name">Hanna Wrobel</h2>
+      <p id="profile-email">hanna@pilatescompany.de</p>
+      <div class="profile-stats">
+        <div class="profile-stat">
+          <div class="val" id="ps-total">13</div>
+          <div class="lbl">Check-ins</div>
+        </div>
+        <div class="profile-stat">
+          <div class="val" id="ps-streak">3</div>
+          <div class="lbl">Wochen-Serie</div>
+        </div>
+        <div class="profile-stat">
+          <div class="val" id="ps-milestone">0</div>
+          <div class="lbl">Geschenke</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Milestones -->
+    <div class="profile-section">
+      <div class="profile-section-title">Meilensteine</div>
+      <div class="milestone-list">
+        <div class="milestone-item">
+          <div class="m-icon">🎁</div>
+          <div class="m-info">
+            <div class="m-title">Drop-in für einen Freund</div>
+            <div class="m-sub">Bei 20 Check-ins (28€ Wert)</div>
+          </div>
+          <div class="m-status pending" id="ms-20">7 fehlen</div>
+        </div>
+        <div class="milestone-item">
+          <div class="m-icon">⭐</div>
+          <div class="m-info">
+            <div class="m-title">Treue-Bonus</div>
+            <div class="m-sub">Bei 50 Check-ins</div>
+          </div>
+          <div class="m-status pending" id="ms-50">37 fehlen</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- History -->
+    <div class="profile-section" style="margin-top:20px">
+      <div class="profile-section-title">Letzte Besuche</div>
+      <div class="checkin-history" id="checkin-history"></div>
+    </div>
+
+    <div class="logout-wrap">
+      <button class="btn btn-outline" onclick="logout()">Ausloggen</button>
+    </div>
+  </div>
+
+  <!-- ════════ BOTTOM NAV ════════ -->
+  <nav class="bottom-nav" id="bottom-nav">
+    <div class="nav-item active" id="nav-home" onclick="showScreen('home')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Home
+    </div>
+    <div class="nav-item" id="nav-checkin" onclick="showScreen('checkin')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+      Check-in
+    </div>
+    <div class="nav-item" id="nav-schedule" onclick="showScreen('schedule')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Kurse
+    </div>
+    <div class="nav-item" id="nav-news" onclick="showScreen('news')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+      News
+    </div>
+    <div class="nav-item" id="nav-profile" onclick="showScreen('profile')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Profil
+    </div>
+  </nav>
+
+</div><!-- /app -->
+
+<script>
+// ═══════════════════════════════════════════
+// CONFIG – Update these before deploying
+// ═══════════════════════════════════════════
+const CONFIG = {
+  SHEET_ID: 'DEINE_GOOGLE_SHEET_ID',
+  NETLIFY_FUNC: '/.netlify/functions',
+  ROOMS: [
+    { id: 'A', name: 'Raum A', label: 'Studio 1' },
+    { id: 'B', name: 'Raum B', label: 'Studio 2' },
+    { id: 'C', name: 'Raum C', label: 'Studio 3' },
+  ],
+  NEWS_CSV: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ7jQ1nTLKVXPoI-ndhl35ds5YbmpI5DOWbMX1ivGTgmxeZNGLEU-Eex4BfMEg3-KJJZbTHLdbcNNRF/pub?output=csv',
+  MILESTONE_1: 20,
+  MILESTONE_2: 50,
+};
+
+// ═══════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════
+let state = {
+  user: null,       // { name, email, checkins, streak, milestones }
+  currentScreen: 'login',
+  selectedRoom: null,
+  news: [],
+};
+
+// ═══════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════
+window.addEventListener('DOMContentLoaded', async () => {
+  // Check for magic link token in URL
+  const params = new URLSearchParams(window.location.search);
+  const token = params.get('token');
+  if (token) {
+    await verifyMagicLink(token);
+  }
+
+  // Check saved session
+  const saved = localStorage.getItem('pc_user');
+  if (saved) {
+    state.user = JSON.parse(saved);
+    await initApp();
+  } else {
+    hideLoading();
+    showScreen('login');
+  }
+});
+
+async function initApp() {
+  await loadUserData();
+  renderHome();
+  renderProfile();
+  await loadNews();
+  renderRooms();
+  hideLoading();
+  showScreen('home');
+  document.getElementById('bottom-nav').classList.add('visible');
+}
+
+function hideLoading() {
+  setTimeout(() => {
+    document.getElementById('loading').classList.add('hidden');
+  }, 600);
+}
+
+// ═══════════════════════════════════════════
+// AUTH
+// ═══════════════════════════════════════════
+let loginMode = 'login';
+
+function setMode(mode) {
+  loginMode = mode;
+  document.getElementById('form-login').style.display = mode === 'login' ? 'block' : 'none';
+  document.getElementById('form-register').style.display = mode === 'register' ? 'block' : 'none';
+  document.getElementById('magic-sent').style.display = 'none';
+  document.getElementById('toggle-login').classList.toggle('active', mode === 'login');
+  document.getElementById('toggle-register').classList.toggle('active', mode === 'register');
+}
+
+async function sendMagicLink() {
+  const email = document.getElementById('login-email').value.trim();
+  if (!email) { showToast('Bitte E-Mail eingeben'); return; }
+
+  showToast('Link wird gesendet...');
+  try {
+    const res = await fetch(`${CONFIG.NETLIFY_FUNC}/magic-link`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+    });
+    const data = await res.json();
+    if (data.ok) {
+      document.getElementById('form-login').style.display = 'none';
+      document.getElementById('magic-sent').style.display = 'block';
+    } else {
+      showToast(data.error || 'E-Mail nicht gefunden. Bitte registrieren.');
+    }
+  } catch {
+    // Demo mode
+    document.getElementById('form-login').style.display = 'none';
+    document.getElementById('magic-sent').style.display = 'block';
+  }
+}
+
+async function register() {
+  const name = document.getElementById('reg-name').value.trim();
+  const email = document.getElementById('reg-email').value.trim();
+  if (!name || !email) { showToast('Bitte alle Felder ausfüllen'); return; }
+
+  showToast('Konto wird erstellt...');
+  try {
+    const res = await fetch(`${CONFIG.NETLIFY_FUNC}/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, email }),
+    });
+    const data = await res.json();
+    if (data.ok) {
+      state.user = { name, email, checkins: 0, streak: 0, milestones: [], history: [] };
+      localStorage.setItem('pc_user', JSON.stringify(state.user));
+      await initApp();
+    } else {
+      showToast(data.error || 'Fehler beim Erstellen');
+    }
+  } catch {
+    // Demo mode – direkt einloggen
+    state.user = { name, email, checkins: 0, streak: 0, milestones: [], history: [] };
+    localStorage.setItem('pc_user', JSON.stringify(state.user));
+    await initApp();
+  }
+}
+
+async function verifyMagicLink(token) {
+  try {
+    const res = await fetch(`${CONFIG.NETLIFY_FUNC}/verify-token?token=${token}`);
+    const data = await res.json();
+    if (data.ok && data.user) {
+      state.user = data.user;
+      localStorage.setItem('pc_user', JSON.stringify(state.user));
+      window.history.replaceState({}, '', '/');
+    }
+  } catch { /* continue to normal init */ }
+}
+
+function resetLogin() {
+  document.getElementById('form-login').style.display = 'block';
+  document.getElementById('magic-sent').style.display = 'none';
+}
+
+function logout() {
+  localStorage.removeItem('pc_user');
+  state.user = null;
+  document.getElementById('bottom-nav').classList.remove('visible');
+  showScreen('login');
+}
+
+// ═══════════════════════════════════════════
+// USER DATA
+// ═══════════════════════════════════════════
+async function loadUserData() {
+  if (!state.user) return;
+  try {
+    const res = await fetch(`${CONFIG.NETLIFY_FUNC}/user-data?email=${encodeURIComponent(state.user.email)}`);
+    const data = await res.json();
+    if (data.ok) {
+      state.user = { ...state.user, ...data.user };
+      localStorage.setItem('pc_user', JSON.stringify(state.user));
+    }
+  } catch {
+    // Use cached data
+    if (!state.user.history) state.user.history = generateDemoHistory();
+    if (!state.user.checkins) state.user.checkins = 13;
+    if (!state.user.streak) state.user.streak = 3;
+  }
+}
+
+function generateDemoHistory() {
+  const courses = ['Reformer Pilates', 'Matten Pilates', 'Aerial', 'Yoga', 'Barre'];
+  const rooms = ['A', 'B', 'C'];
+  return Array.from({ length: 8 }, (_, i) => ({
+    course: courses[i % courses.length],
+    room: rooms[i % rooms.length],
+    date: new Date(Date.now() - i * 4 * 24 * 60 * 60 * 1000).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' }),
+  }));
+}
+
+// ═══════════════════════════════════════════
+// RENDER HOME
+// ═══════════════════════════════════════════
+function renderHome() {
+  if (!state.user) return;
+  const u = state.user;
+  const firstName = u.name.split(' ')[0];
+
+  document.getElementById('home-name').textContent = firstName;
+  document.getElementById('streak-count').innerHTML = `${u.streak || 0} <span>Wochen</span>`;
+  document.getElementById('stat-total').textContent = u.checkins || 0;
+  document.getElementById('stat-month').textContent = u.monthCheckins || Math.min(u.checkins || 0, 8);
+
+  // Milestone bar
+  const progress = Math.min((u.checkins || 0) / CONFIG.MILESTONE_1, 1);
+  document.getElementById('milestone-bar').style.width = `${progress * 100}%`;
+  document.getElementById('milestone-text').textContent = `${u.checkins || 0} von ${CONFIG.MILESTONE_1} Check-ins`;
+
+  // Streak dots (last 6 weeks)
+  const dots = document.getElementById('streak-dots');
+  const days = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
+  dots.innerHTML = days.map((d, i) => {
+    const cls = i < (u.streak || 0) ? 'done' : i === (u.streak || 0) ? 'current' : '';
+    return `<div class="streak-dot ${cls}">${d}</div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════
+// RENDER PROFILE
+// ═══════════════════════════════════════════
+function renderProfile() {
+  if (!state.user) return;
+  const u = state.user;
+
+  document.getElementById('profile-name').textContent = u.name;
+  document.getElementById('profile-email').textContent = u.email;
+  document.getElementById('profile-avatar').textContent = u.name.charAt(0).toUpperCase();
+  document.getElementById('ps-total').textContent = u.checkins || 0;
+  document.getElementById('ps-streak').textContent = u.streak || 0;
+  document.getElementById('ps-milestone').textContent = (u.milestones || []).length;
+
+  // Milestone status
+  const rem1 = Math.max(0, CONFIG.MILESTONE_1 - (u.checkins || 0));
+  const rem2 = Math.max(0, CONFIG.MILESTONE_2 - (u.checkins || 0));
+  document.getElementById('ms-20').textContent = rem1 === 0 ? '✓ Erreicht' : `${rem1} fehlen`;
+  document.getElementById('ms-20').className = `m-status ${rem1 === 0 ? 'done' : 'pending'}`;
+  document.getElementById('ms-50').textContent = rem2 === 0 ? '✓ Erreicht' : `${rem2} fehlen`;
+  document.getElementById('ms-50').className = `m-status ${rem2 === 0 ? 'done' : 'pending'}`;
+
+  // History
+  const history = u.history || generateDemoHistory();
+  const histEl = document.getElementById('checkin-history');
+  histEl.innerHTML = history.slice(0, 6).map(h => `
+    <div class="history-item">
+      <div class="history-dot"></div>
+      <div>
+        <div class="h-course">${h.course}</div>
+        <div class="h-date">${h.date}</div>
+      </div>
+      <div class="h-room">Raum ${h.room}</div>
+    </div>
+  `).join('');
+}
+
+// ═══════════════════════════════════════════
+// NEWS
+// ═══════════════════════════════════════════
+async function loadNews() {
+  try {
+    const res = await fetch(CONFIG.NEWS_CSV);
+    const text = await res.text();
+    state.news = parseCSV(text);
+  } catch {
+    state.news = [
+      { title: 'Sommerpause 15.–25. August', text: 'Das Studio ist in der Sommerpause geschlossen.', tag: 'Info', date: '01.07.2025' },
+      { title: 'Neuer Aerial-Kurs ab September', text: 'Wir freuen uns auf einen neuen Aerial-Kurs mit Maike!', tag: 'Neu', date: '28.06.2025' },
+      { title: 'Kursausfall: Reformer Di 10 Uhr', text: 'Der Kurs am Dienstag entfällt diese Woche.', tag: 'Ausfall', date: '24.06.2025' },
+    ];
+  }
+  renderNews();
+}
+
+function parseCSV(text) {
+  const lines = text.trim().split('\n');
+  const headers = lines[0].split(',').map(h => h.replace(/"/g, '').trim());
+  return lines.slice(1).map(line => {
+    const vals = line.split(',').map(v => v.replace(/"/g, '').trim());
+    const obj = {};
+    headers.forEach((h, i) => obj[h] = vals[i] || '');
+    return obj;
+  }).filter(r => r.title || r.Titel);
+}
+
+function renderNews() {
+  const news = state.news.slice(0, 5);
+
+  // Preview on home
+  const previewEl = document.getElementById('news-preview-list');
+  previewEl.innerHTML = news.slice(0, 2).map(n => {
+    const title = n.title || n.Titel || '';
+    const text = n.text || n.Text || n.Inhalt || '';
+    const tag = n.tag || n.Kategorie || 'Info';
+    const isUrgent = tag.toLowerCase().includes('ausfall');
+    return `
+      <div class="news-item-preview" onclick="showScreen('news')">
+        <div class="news-badge ${isUrgent ? 'urgent' : ''}">${tag}</div>
+        <h4>${title}</h4>
+        <p>${text}</p>
+      </div>
+    `;
+  }).join('');
+
+  // Full list
+  const listEl = document.getElementById('news-list');
+  listEl.innerHTML = news.map(n => {
+    const title = n.title || n.Titel || '';
+    const text = n.text || n.Text || n.Inhalt || '';
+    const tag = n.tag || n.Kategorie || 'Info';
+    const date = n.date || n.Datum || '';
+    const isUrgent = tag.toLowerCase().includes('ausfall');
+    return `
+      <div class="news-card">
+        <div class="news-card-body">
+          <div class="news-card-meta">
+            <div class="news-badge ${isUrgent ? 'urgent' : ''}">${tag}</div>
+            <div class="news-date">${date}</div>
+          </div>
+          <h3>${title}</h3>
+          <p>${text}</p>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════
+// CHECK-IN
+// ═══════════════════════════════════════════
+function renderRooms() {
+  const now = new Date();
+  const timeStr = now.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+
+  const grid = document.getElementById('room-grid');
+  grid.innerHTML = CONFIG.ROOMS.map(r => `
+    <div class="room-btn" id="room-${r.id}" onclick="selectRoom('${r.id}')">
+      <span class="room-name">${r.name}</span>
+      <span class="room-course">${r.label}</span>
+    </div>
+  `).join('');
+}
+
+function selectRoom(roomId) {
+  state.selectedRoom = roomId;
+  document.querySelectorAll('.room-btn').forEach(b => b.classList.remove('selected'));
+  document.getElementById(`room-${roomId}`).classList.add('selected');
+  document.getElementById('checkin-confirm-btn').disabled = false;
+}
+
+async function confirmCheckin() {
+  if (!state.selectedRoom) return;
+
+  const now = new Date();
+  const course = detectCourse(state.selectedRoom, now);
+
+  try {
+    await fetch(`${CONFIG.NETLIFY_FUNC}/checkin`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: state.user.email,
+        name: state.user.name,
+        room: state.selectedRoom,
+        course,
+        timestamp: now.toISOString(),
+      }),
+    });
+  } catch { /* offline – still show success */ }
+
+  // Update local state
+  state.user.checkins = (state.user.checkins || 0) + 1;
+  if (!state.user.history) state.user.history = [];
+  state.user.history.unshift({
+    course,
+    room: state.selectedRoom,
+    date: now.toLocaleDateString('de-DE'),
+  });
+  localStorage.setItem('pc_user', JSON.stringify(state.user));
+
+  // Show success
+  document.getElementById('success-course').textContent = course;
+  document.getElementById('room-selector').style.display = 'none';
+  document.getElementById('checkin-success').style.display = 'block';
+
+  // Update home & profile
+  renderHome();
+  renderProfile();
+
+  // Check milestone
+  if (state.user.checkins === CONFIG.MILESTONE_1) {
+    setTimeout(() => showToast('🎉 Meilenstein! 20 Check-ins – Dein Freund-Gutschein kommt per E-Mail!'), 1000);
+  }
+}
+
+function detectCourse(room, time) {
+  // This would normally look up the schedule
+  // For now returns a plausible course based on time
+  const hour = time.getHours();
+  const day = time.getDay();
+  const courses = {
+    A: ['Reformer Pilates', 'Matten Pilates', 'Barre'],
+    B: ['Aerial', 'Yoga', 'Reformer Pilates'],
+    C: ['Matten Pilates', 'Barre', 'Yoga'],
+  };
+  const list = courses[room] || ['Pilates'];
+  return list[Math.floor(hour / 8) % list.length];
+}
+
+function resetCheckin() {
+  state.selectedRoom = null;
+  document.getElementById('room-selector').style.display = 'block';
+  document.getElementById('checkin-success').style.display = 'none';
+  document.getElementById('checkin-confirm-btn').disabled = true;
+  document.querySelectorAll('.room-btn').forEach(b => b.classList.remove('selected'));
+}
+
+// ═══════════════════════════════════════════
+// PUSH NOTIFICATIONS
+// ═══════════════════════════════════════════
+async function requestPush() {
+  if (!('Notification' in window)) {
+    showToast('Dein Browser unterstützt keine Push-Benachrichtigungen');
+    return;
+  }
+  const permission = await Notification.requestPermission();
+  if (permission === 'granted') {
+    document.getElementById('push-banner').style.display = 'none';
+    showToast('✓ Benachrichtigungen aktiviert!');
+    // Register service worker push here
+  } else {
+    showToast('Benachrichtigungen abgelehnt');
+  }
+}
+
+// ═══════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+
+  document.getElementById(`screen-${name}`).classList.add('active');
+  const navEl = document.getElementById(`nav-${name}`);
+  if (navEl) navEl.classList.add('active');
+
+  state.currentScreen = name;
+  window.scrollTo(0, 0);
+}
+
+// ═══════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// Service Worker
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').catch(() => {});
+}
+</script>
+</body>
+</html>
